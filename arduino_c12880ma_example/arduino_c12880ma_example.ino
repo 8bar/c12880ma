@@ -101,10 +101,10 @@ void loop() {
   if (Serial.available() > 0) {
     // read the incoming byte:
     incomingByte = Serial.read();
-    if (incomingByte==91) {
+    if (incomingByte==93) {
       int_time=min(int_time*2,1048576);
     }
-    if (incomingByte==93) {
+    if (incomingByte==91) {
       int_time=max(int_time/2,2);
     }
   }
