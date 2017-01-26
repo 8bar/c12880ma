@@ -6,6 +6,8 @@ int[] data;
 double[] summed;
 int draw_sum=0;
 
+int int_time=4096;
+
 double find_max(double[] input)
 {
   double max = 0;
@@ -14,7 +16,7 @@ double find_max(double[] input)
     if (input[i] > max)
     {
       max = input[i];
-    }            
+    }
   }
   return max;
 }
@@ -47,7 +49,9 @@ void plotdata()
 void setup() 
 {
   println(Serial.list());
-  String portName = Serial.list()[0]; //This is the index into the serial list, if you only have one serial device the index is 0
+  // This is the index into the serial list, if you only
+  // have one serial device the index is 0
+  String portName = Serial.list()[0]; 
   myPort = new Serial(this, portName, 115200);
 
   summed = new double[288];
@@ -64,7 +68,8 @@ void draw()
 {
   if ( myPort.available() > 0) 
   {  
-    val = myPort.readStringUntil('\n');         // read it and store it in val
+    // read it and store it in val
+    val = myPort.readStringUntil('\n');        
     if (val != null)
     {
       data = int(split(val, ',')); 
@@ -92,19 +97,20 @@ void keyPressed() {
     {
       summed[i] = 0;
     }
-  } 
-  else if (key == 't' ) 
+  } else if (key == 't' ) 
   {
-    if(draw_sum==1)
+    if (draw_sum==1)
     {
       draw_sum = 0;
-    }
-    else
+    } else
     {
       draw_sum = 1;
     }
-  } 
-  else 
+  } else if (key == '[')
   {
+    myPort.write(91);
+  } else if (key == ']')
+  {
+    myPort.write(93);
   }
 }
