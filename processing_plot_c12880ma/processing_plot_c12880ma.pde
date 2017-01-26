@@ -6,8 +6,6 @@ int[] data;
 double[] summed;
 int draw_sum=0;
 
-int int_time=4096;
-
 double find_max(double[] input)
 {
   double max = 0;
