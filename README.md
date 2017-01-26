@@ -11,4 +11,4 @@ Modified the clock cycle counts to (hopefully) capture all of the VID signals.
 
 Adjusted the ST signal so as not to include the serial communication in the integration period.
 
-Please note that the clock timing in this code does not conform to the datasheet requirements. On an Uno, the CLK signal runs at about 125 kHZ with a roughly 50% duty cycle during the integration period, but during reading of the VID signal, it slows way down to about 8 kHZ with a duty cycle of only a couple percent! Nevertheless, it seems to work OK.
+Please note that the clock timing in this code does not conform to the datasheet requirements. On an Uno, the CLK signal runs at about 125 kHZ with a roughly 50% duty cycle during the integration period, but during reading of the VID signal, it slows way down to about 8 kHZ with a duty cycle of only a couple percent! Nevertheless, it seems to work OK. See file 593.png for scope traces.
