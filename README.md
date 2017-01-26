@@ -1,5 +1,5 @@
 # c12880ma
-This is a modification of groupgets C12880MA Arduino and Processing example. It's been tested on an Arduino Uno.
+This is a modification of GroupGets C12880MA Arduino and Processing example. It's been tested on an Arduino Uno.
 
 Changelog:
 
