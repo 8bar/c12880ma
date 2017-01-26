@@ -1,6 +1,6 @@
 /*
- * Macro Definitions
- */
+   Macro Definitions
+*/
 #define SPEC_TRG         A0
 #define SPEC_ST          A1
 #define SPEC_CLK         A2
@@ -11,8 +11,11 @@
 #define SPEC_CHANNELS    288 // New Spec Channel
 uint16_t data[SPEC_CHANNELS];
 
-void setup(){
+unsigned long int_time = 4096;
+int incomingByte = 0;
 
+void setup() {
+  
   //Set desired pins to OUTPUT
   pinMode(SPEC_CLK, OUTPUT);
   pinMode(SPEC_ST, OUTPUT);
@@ -23,107 +26,86 @@ void setup(){
   digitalWrite(SPEC_ST, LOW); // Set SPEC_ST Low
 
   Serial.begin(115200); // Baud Rate set to 115200
-  
 }
 
 /*
- * This functions reads spectrometer data from SPEC_VIDEO
- * Look at the Timing Chart in the Datasheet for more info
- */
-void readSpectrometer(){
+   This functions reads spectrometer data from SPEC_VIDEO
+   Look at the Timing Chart in the Datasheet for more info
+*/
+void readSpectrometer() {
+  
+  // Start clock cycle
+  for (int i = 0; i < 10; i++) {
+    digitalWrite(SPEC_CLK, LOW);
+    digitalWrite(SPEC_CLK, HIGH);
+  }
 
-  int delayTime = 1; // delay time
-
-  // Start clock cycle and set start pulse to signal start
-  digitalWrite(SPEC_CLK, LOW);
-  delayMicroseconds(delayTime);
-  digitalWrite(SPEC_CLK, HIGH);
-  delayMicroseconds(delayTime);
+  // set START high and do four clock cycles
   digitalWrite(SPEC_CLK, LOW);
   digitalWrite(SPEC_ST, HIGH);
-  delayMicroseconds(delayTime);
+  for (int i = 0; i < 4; i++) {
+    digitalWrite(SPEC_CLK, HIGH);
+    digitalWrite(SPEC_CLK, LOW);
+  }
 
-  //Sample for a period of time
-  for(int i = 0; i < 15; i++){
-
-      digitalWrite(SPEC_CLK, HIGH);
-      delayMicroseconds(delayTime);
-      digitalWrite(SPEC_CLK, LOW);
-      delayMicroseconds(delayTime); 
- 
+  //Clock cycles for integration time
+  for (int i = 0; i < int_time; i++) {
+    digitalWrite(SPEC_CLK, HIGH);
+    digitalWrite(SPEC_CLK, LOW);
   }
 
   //Set SPEC_ST to low
   digitalWrite(SPEC_ST, LOW);
 
   //Sample for a period of time
-  for(int i = 0; i < 85; i++){
-
-      digitalWrite(SPEC_CLK, HIGH);
-      delayMicroseconds(delayTime);
-      digitalWrite(SPEC_CLK, LOW);
-      delayMicroseconds(delayTime); 
-      
+  for (int i = 0; i < 88; i++) {
+    digitalWrite(SPEC_CLK, HIGH);
+    digitalWrite(SPEC_CLK, LOW);
   }
-
-  //One more clock pulse before the actual read
-  digitalWrite(SPEC_CLK, HIGH);
-  delayMicroseconds(delayTime);
-  digitalWrite(SPEC_CLK, LOW);
-  delayMicroseconds(delayTime);
 
   //Read from SPEC_VIDEO
-  for(int i = 0; i < SPEC_CHANNELS; i++){
-
-      data[i] = analogRead(SPEC_VIDEO);
-      
-      digitalWrite(SPEC_CLK, HIGH);
-      delayMicroseconds(delayTime);
-      digitalWrite(SPEC_CLK, LOW);
-      delayMicroseconds(delayTime);
-        
+  for (int i = 0; i < SPEC_CHANNELS; i++) {
+    data[i] = analogRead(SPEC_VIDEO);
+    digitalWrite(SPEC_CLK, HIGH);
+    digitalWrite(SPEC_CLK, LOW);
   }
 
-  //Set SPEC_ST to high
-  digitalWrite(SPEC_ST, HIGH);
-
-  //Sample for a small amount of time
-  for(int i = 0; i < 7; i++){
-    
-      digitalWrite(SPEC_CLK, HIGH);
-      delayMicroseconds(delayTime);
-      digitalWrite(SPEC_CLK, LOW);
-      delayMicroseconds(delayTime);
-    
+  //Run clock for a small amount of time
+  for (int i = 0; i < 7; i++) {
+    digitalWrite(SPEC_CLK, HIGH);
+    digitalWrite(SPEC_CLK, LOW);
   }
-
   digitalWrite(SPEC_CLK, HIGH);
-  delayMicroseconds(delayTime);
-  
 }
 
 /*
- * The function below prints out data to the terminal or 
- * processing plot
- */
-void printData(){
+   The function below prints out data to the
+   terminal or processing plot
+*/
+void printData() {
   
-  for (int i = 0; i < SPEC_CHANNELS; i++){
-    
+  for (int i = 0; i < SPEC_CHANNELS; i++) {
     Serial.print(data[i]);
     Serial.print(',');
-    
   }
-  
   Serial.print("\n");
 }
 
-void loop(){
-   
+void loop() {
+  
   readSpectrometer();
   printData();
-  delay(10);  
-   
+  delay(100);
+
+  // check for incoming data
+  if (Serial.available() > 0) {
+    // read the incoming byte:
+    incomingByte = Serial.read();
+    if (incomingByte==91) {
+      int_time=min(int_time*2,1048576);
+    }
+    if (incomingByte==93) {
+      int_time=max(int_time/2,2);
+    }
+  }
 }
-
-
